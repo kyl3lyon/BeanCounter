@@ -3,8 +3,6 @@ import logging
 from api.woocommerce import fetch_and_process_sales_data
 from config.logs import setup_logging
 
-setup_logging()  # Set up logging configurations
-
 
 def ingest_woocommerce_data_job():
   logging.info("Fetching sales data...")
@@ -13,9 +11,15 @@ def ingest_woocommerce_data_job():
     logging.info("Fetched sales data successfully.")
 
 
+# def start_dash_app():
+# dash_app.run_server(debug=True)
+
+
 def main():
-  ingest_woocommerce_data_job()
+  ingest_woocommerce_data_job()  # Fetch and process sales data
+  # start_dash_app()  # Start the Dash app
 
 
 if __name__ == "__main__":
+  setup_logging()  # Set up logging configurations
   main()

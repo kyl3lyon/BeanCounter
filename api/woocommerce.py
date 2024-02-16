@@ -74,32 +74,52 @@ def process_sales_data(data):
 def fetch_sales_data():
   wc_api = get_wc_api()
   last_timestamp = get_last_processed_timestamp()
+  logging.info(f"Starting to fetch sales data after {last_timestamp}")
 
-  # Define the 'after' parameter to fetch orders after January 1, 2023
+  page = 1
+  per_page = 100
   params = {
       "after":
       last_timestamp.isoformat() if last_timestamp else "2023-01-01T00:00:00",
-      "per_page": 100  # Default is 10
+      "per_page": per_page,
   }
 
-  for attempt in range(3):  # Retry mechanism for up to 3 attempts
-    try:
+  all_data = []
+
+  try:
+    while True:
+      params['page'] = page
       response = wc_api.get("orders", params=params)
+      logging.info(f"Status code: {response.status_code} for page {page}")
+
       if response.status_code == 200:
         data = response.json()
-        # Log size and preview
-        logging.info(f"Fetched {len(data)} records: {data[:5]}...")
-        return data
+        if data:
+          all_data.extend(data)
+          # Log the number of records fetched
+          logging.info(
+              f"Fetched {len(data)} records in page {page}. Total records fetched: {len(all_data)}"
+          )
+          page += 1
+        else:
+          logging.info(
+              "No more sales data to fetch. Successfully completed data fetch."
+          )
+          break
       else:
-        # Log error message
         logging.error(
-            f"Failed to fetch sales data, status code: {response.status_code}")
-    except Exception as e:
-      logging.error(f"Attempt {attempt + 1}: An error occurred: {e}")
-      time.sleep(2)  # Wait for 2 seconds before retrying
+            f"Failed to fetch sales data for page {page}, status code: {response.status_code}"
+        )
+        break  # Exit the loop on this failure
 
-  # Log final error message and return None after all attempts fail
-  logging.error("Failed to fetch sales data after multiple attempts")
+    if all_data:
+      logging.info(f"Fetched a total of {len(all_data)} records.")
+    else:
+      logging.info("No new sales data to fetch since the last timestamp.")
+    return all_data
+  except Exception as e:
+    logging.error(f"An error occurred while fetching sales data: {e}")
+
   return None
 
 
