@@ -1,15 +1,17 @@
-import os
-from datetime import datetime
+import logging
 
 import pandas as pd
 from woocommerce import API
 
+from config.logs import setup_logging
 from config.settings import (
     WOO_COMMERCE_CONSUMER_KEY,
     WOO_COMMERCE_CONSUMER_SECRET,
     WOO_COMMERCE_URL,
 )
 from database.db import get_last_processed_timestamp, insert_sales_data_to_db
+
+setup_logging()  # Set up logging configurations
 
 
 def get_wc_api():
@@ -80,17 +82,26 @@ def fetch_sales_data():
   }
   response = wc_api.get("orders", params=params)
   if response.status_code == 200:
-    return response.json()
+    data = response.json()
+    # Log size and preview
+    logging.info(f"Fetched {len(data)} records: {data[:5]}...")
+    return data
   else:
+    # Log error message and return None
+    logging.error(
+        "Failed to fetch sales data, status code: {response.status_code}")
     return None
 
 
 def fetch_and_process_sales_data():
   sales_data = fetch_sales_data()
-  if sales_data is not None:
+  if sales_data:
+    if len(sales_data) == 0:
+      logging.info("No new sales data to process.")  # Log no new data
+      return None
     processed_data = process_sales_data(sales_data)
-    # Invoke the function to insert the data into the database
     insert_sales_data_to_db(processed_data)
     return processed_data
   else:
-    print("Failed to fetch sales data")
+    logging.error("Failed to fetch or process sales data")  # Log error
+    return None
