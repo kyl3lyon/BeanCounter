@@ -1,8 +1,15 @@
 import logging
+import os
+import sys
 import time
 
 import schedule
 
+# Add the parent directory to the system path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
+
+# Import the required modules
 from config.logs import setup_logging
 from main import ingest_woocommerce_data_job
 
