@@ -31,7 +31,7 @@ def setup_schedule():
   # Execute the scheduled jobs indefinitely.
   while True:
     schedule.run_pending()
-    time.sleep(1)  # Wait for one second before checking the schedule again
+    time.sleep(120)  # Wait for two minutes before checking the schedule again
     # Adds a log statement that confirms the scheduler is running, every 10 minutes.
     if int(time.strftime('%M')) % 10 == 0:  # Every 10 minutes
       logging.info("Scheduler is running, waiting for the next job...")

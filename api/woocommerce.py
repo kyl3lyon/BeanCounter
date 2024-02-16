@@ -1,4 +1,5 @@
 import logging
+import time
 
 import pandas as pd
 from woocommerce import API
@@ -80,17 +81,26 @@ def fetch_sales_data():
       last_timestamp.isoformat() if last_timestamp else "2023-01-01T00:00:00",
       "per_page": 100  # Default is 10
   }
-  response = wc_api.get("orders", params=params)
-  if response.status_code == 200:
-    data = response.json()
-    # Log size and preview
-    logging.info(f"Fetched {len(data)} records: {data[:5]}...")
-    return data
-  else:
-    # Log error message and return None
-    logging.error(
-        "Failed to fetch sales data, status code: {response.status_code}")
-    return None
+
+  for attempt in range(3):  # Retry mechanism for up to 3 attempts
+    try:
+      response = wc_api.get("orders", params=params)
+      if response.status_code == 200:
+        data = response.json()
+        # Log size and preview
+        logging.info(f"Fetched {len(data)} records: {data[:5]}...")
+        return data
+      else:
+        # Log error message
+        logging.error(
+            f"Failed to fetch sales data, status code: {response.status_code}")
+    except Exception as e:
+      logging.error(f"Attempt {attempt + 1}: An error occurred: {e}")
+      time.sleep(2)  # Wait for 2 seconds before retrying
+
+  # Log final error message and return None after all attempts fail
+  logging.error("Failed to fetch sales data after multiple attempts")
+  return None
 
 
 def fetch_and_process_sales_data():
