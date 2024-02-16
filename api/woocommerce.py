@@ -95,13 +95,15 @@ def fetch_sales_data():
 
 def fetch_and_process_sales_data():
   sales_data = fetch_sales_data()
-  if sales_data:
+  if sales_data is not None:
     if len(sales_data) == 0:
-      logging.info("No new sales data to process.")  # Log no new data
+      # Log that there are no sales data to process
+      logging.info("No new sales data to process.")
       return None
     processed_data = process_sales_data(sales_data)
     insert_sales_data_to_db(processed_data)
     return processed_data
   else:
-    logging.error("Failed to fetch or process sales data")  # Log error
+    # Log that there was an error fetching sales data
+    logging.error("Failed to fetch or process sales data")
     return None
