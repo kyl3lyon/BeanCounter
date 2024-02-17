@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 import psycopg2
+import streamlit as st
 
 from config.settings import DATABASE_URL
 
@@ -54,16 +55,16 @@ def insert_sales_data_to_db(processed_data):
   conn.close()
 
 
-def get_db_data_for_dashboard():
+@st.cache_data
+def query_postgresql():
   conn = get_db_connection()
   try:
     sql_query = """
-      SELECT DATE(date_created) AS Date, COUNT(DISTINCT customer_id) AS Registrations
+      SELECT *
       FROM sales_data
       WHERE date_created > '2023-01-01T00:00:00'
       AND status != 'failed'
-      GROUP BY DATE(date_created)
-      ORDER BY DATE(date_created);
+      ORDER BY date_created;
       """
     df = pd.read_sql_query(sql_query, conn)
     return df
