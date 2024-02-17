@@ -14,6 +14,6 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["sh", "-c", "python3 config/scheduler.py"]
+run = ["sh", "-c", "python3 main.py"]
 deploymentTarget = "gce"
 ignorePorts = true

@@ -1,5 +1,4 @@
 import logging
-import time
 
 import pandas as pd
 from woocommerce import API
@@ -137,3 +136,10 @@ def fetch_and_process_sales_data():
     # Log that there was an error fetching sales data
     logging.error("Failed to fetch or process sales data")
     return None
+
+
+def ingest_woocommerce_data_job():
+  logging.info("Fetching sales data...")
+  sales_data = fetch_and_process_sales_data()
+  if sales_data:
+    logging.info("Fetched sales data successfully.")

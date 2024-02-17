@@ -1,25 +1,52 @@
-import logging
+import json
+import subprocess
+from multiprocessing import Process, set_start_method
 
-from api.woocommerce import fetch_and_process_sales_data
 from config.logs import setup_logging
+from config.scheduler import setup_schedule
+from config.settings import STREAMLIT_APP_PATH
 
 
-def ingest_woocommerce_data_job():
-  logging.info("Fetching sales data...")
-  sales_data = fetch_and_process_sales_data()
-  if sales_data:  # If there's some data, log success.
-    logging.info("Fetched sales data successfully.")
+def run_streamlit_app():
+  if STREAMLIT_APP_PATH:
+    streamlit_command = f"streamlit run {STREAMLIT_APP_PATH}"
+    subprocess.run(streamlit_command, shell=True)
+  else:
+    raise EnvironmentError("Streamlit app path is not set in settings.py.")
 
 
-# def start_dash_app():
-# dash_app.run_server(debug=True)
+def run_scheduler():
+  setup_schedule()
+
+
+class ProcessManager:
+  # Set the start method to "fork" to ensure that the child processes are created
+  def __init__(self, target, args=None):
+    if args is None:
+      self.process = Process(target=target)
+    else:
+      self.process = Process(target=target, args=args)
+
+  # Start the process
+  def __enter__(self):
+    self.process.start()
+    return self.process
+
+  # Stop the process
+  def __exit__(self, exc_type, exc_val, exc_tb):
+    self.process.join()
 
 
 def main():
-  ingest_woocommerce_data_job()  # Fetch and process sales data
-  # start_dash_app()  # Start the Dash app
+  # Ensure the default start method is appropriate for the platform
+  set_start_method('spawn')
+  setup_logging()
+
+  with ProcessManager(run_scheduler), ProcessManager(run_streamlit_app):
+    # Both processes are started, and we wait for them to complete.
+    # This block ensures that any cleanup logic is executed upon exiting.
+    pass  # You can perform other main thread tasks here, if necessary.
 
 
 if __name__ == "__main__":
-  setup_logging()  # Set up logging configurations
   main()
