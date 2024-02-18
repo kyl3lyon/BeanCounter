@@ -3,11 +3,11 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import streamlit as st
+import streamlit as st  # type: ignore
 
-from dashboard.views.attendees import page as attendees_overview
-from dashboard.views.presenters import page as presenter_overview
-from dashboard.views.revenue import page as revenue_overview
+from dashboard.views.attendees import page as attendees_overview  # type: ignore
+from dashboard.views.presenters import page as presenter_overview  # type: ignore
+from dashboard.views.revenue import page as revenue_overview  # type: ignore
 
 # Page Configuration
 st.set_page_config(page_title="2024 ICSB Registrations Dashboard",

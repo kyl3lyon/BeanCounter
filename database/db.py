@@ -64,7 +64,7 @@ def query_postgresql():
       FROM sales_data
       WHERE date_created > '2023-01-01T00:00:00'
       AND status != 'failed'
-      ORDER BY date_created;
+      ORDER BY date_created DESC;
       """
     df = pd.read_sql_query(sql_query, conn)
     return df
